@@ -12,7 +12,8 @@
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:error-response>
         </http:listener>
-        <logger level="INFO" doc:name="Logger" doc:id="577d148f-b75d-468e-801d-5449d8222f24" message="MainFlow Started"/>
+        <set-variable value="" doc:name="Set transactionId" doc:id="3f0b179b-b494-4bbf-9ffb-7e1905407200" variableName="transactionId"/>
+		<logger level="INFO" doc:name="Logger" doc:id="577d148f-b75d-468e-801d-5449d8222f24" message="MainFlow Started"/>
 		<apikit:router config-ref="customer-xpapi-config" />
 		<logger level="INFO" doc:name="Logger" doc:id="5a406a1c-d29a-4f99-9e8f-2033378468ac" message="MainFlow completed"/>
 		<error-handler ref="Error_Handler-APIKit" />
