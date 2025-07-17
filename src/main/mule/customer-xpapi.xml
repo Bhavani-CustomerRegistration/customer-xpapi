@@ -58,19 +58,11 @@ output application/json
 			<ee:message >
 			</ee:message>
 			<ee:variables >
-				<ee:set-variable variableName="mobile" ><![CDATA[%dw 2.0
-output application/java
----
-(payload.craeteOTPRequest.countryCode default "+91") ++ payload.craeteOTPRequest.mobile]]></ee:set-variable>
 				<ee:set-variable variableName="contactType" ><![CDATA[%dw 2.0
 output application/java
 ---
 payload.craeteOTPRequest.contactType
 ]]></ee:set-variable>
-				<ee:set-variable variableName="email" ><![CDATA[%dw 2.0
-output application/java
----
-payload.craeteOTPRequest.email ]]></ee:set-variable>
 				<ee:set-variable variableName="to" ><![CDATA[%dw 2.0
 output application/java
 ---
@@ -95,7 +87,7 @@ attributes.queryParams.otpAction]]></ee:set-variable>
 output application/java
 ---
 {
-	"message": "The otp generated is " 
+	"message" : "The OTP is : "
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
