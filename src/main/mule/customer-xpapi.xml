@@ -12,14 +12,14 @@
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:error-response>
         </http:listener>
-        <set-variable value="" doc:name="Set transactionId" doc:id="3f0b179b-b494-4bbf-9ffb-7e1905407200" variableName="transactionId"/>
-		<logger level="INFO" doc:name="Logger" doc:id="577d148f-b75d-468e-801d-5449d8222f24" message="MainFlow Started"/>
+        <set-variable value="#[attributes.headers.'x-voic-msg' default correlationId]" doc:name="Set transactionId" doc:id="3f0b179b-b494-4bbf-9ffb-7e1905407200" variableName="transactionId"/>
+		<logger level="INFO" doc:name="Start Logger" doc:id="577d148f-b75d-468e-801d-5449d8222f24" message="MainFlow Started "/>
 		<apikit:router config-ref="customer-xpapi-config" />
-		<logger level="INFO" doc:name="Logger" doc:id="5a406a1c-d29a-4f99-9e8f-2033378468ac" message="MainFlow completed"/>
+		<logger level="INFO" doc:name="End Logger" doc:id="5a406a1c-d29a-4f99-9e8f-2033378468ac" message="MainFlow completed"/>
 		<error-handler ref="Error_Handler-APIKit" />
        
     </flow>
-    <flow name="customer-xpapi-console">
+	<flow name="customer-xpapi-console">
         <http:listener config-ref="customer-xpapi-httpListenerConfig" path="/console/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -29,11 +29,15 @@
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:console config-ref="customer-xpapi-config" />
+        <set-variable value="#[attributes.headers.'x-voic-msg' default correlationId]" doc:name="Set transactionId" doc:id="8c5e8b91-32a3-4af4-ad08-dfc11c80e56d" variableName="transactionId" />
+		<logger level="INFO" doc:name="Start Logger" doc:id="88bccb8b-e947-4897-9701-92949f61bf63" message="MainFlow Started" />
+		<apikit:console config-ref="customer-xpapi-config" />
+		<logger level="INFO" doc:name="End Logger" doc:id="4e431b24-9dbb-46d1-a961-0c966a423779" message="Flow Processing completed  For Transaction ID  #[vars.transactionId]" />
 		<error-handler ref="Error_Handler-APIKit" />
     </flow>
     <flow name="get:\healthCheck:customer-xpapi-config">
 		<http:listener doc:name="Listener" doc:id="0342ea91-1804-46ef-82f7-1daefb8d2ce5" config-ref="customer-xpapi-httpListenerConfig" path="/healthcheck"/>
+		<logger level="INFO" doc:name="Flow Logger" doc:id="2a494044-c1b0-4f13-b5f3-1bc67a8c48a0" message="Process Flow Started  For Transaction ID  #[vars.transactionId]"/>
 		<ee:transform doc:name="Transform Message">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -45,11 +49,65 @@ output application/json
 } as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
+		<error-handler ref="Error_Handler_Application" />
     </flow>
     <flow name="post:\customers\registration:application\json:customer-xpapi-config">
         <http:listener doc:name="Listener" doc:id="056c204b-3383-4b45-88ca-a06ecbbdbbe4" config-ref="customer-xpapi-httpListenerConfig" path="/customer"/>
-		<logger level="INFO" doc:name="Logger" doc:id="846407f0-e532-4e98-baa2-22cc10f63257" message="ConfigFlow Started"/>
+		<logger level="INFO" doc:name="Flow Logger" doc:id="06676732-02fe-406a-a884-300777a9ee4d" message="Flow Processing Started For Transaction ID  #[vars.transactionId]" />
+		<ee:transform doc:name="Transform Message" doc:id="07b19e6e-f140-44a8-a6bb-5c32a58dc7c8" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="mobile" ><![CDATA[%dw 2.0
+output application/java
+---
+(payload.craeteOTPRequest.countryCode default "+91") ++ payload.craeteOTPRequest.mobile]]></ee:set-variable>
+				<ee:set-variable variableName="contactType" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.contactType
+]]></ee:set-variable>
+				<ee:set-variable variableName="email" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.email ]]></ee:set-variable>
+				<ee:set-variable variableName="to" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.to]]></ee:set-variable>
+				<ee:set-variable variableName="from" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.from]]></ee:set-variable>
+				<ee:set-variable variableName="otpVar" ><![CDATA[%dw 2.0
+output application/json
+---
+randomInt(999999) ]]></ee:set-variable>
+				<ee:set-variable variableName="featureName" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.queryParams.featureName]]></ee:set-variable>
+				<ee:set-variable variableName="otpAction" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.queryParams.otpAction]]></ee:set-variable>
+				<ee:set-variable variableName="body" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message": "The otp generated is " 
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="f878faf4-d7ba-4efc-9e72-d93929103516" >
+			<when expression='#[(vars.otpAction == "createOTP") and (vars.featureName == "cwp" or vars.featureName == "po" )]'>
+				<flow-ref doc:name="Flow Reference" doc:id="e7b8e921-48c4-4a0c-9ff7-191be9420b51" name="create-otp-implementationFlow"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="1ecb2c56-1666-4989-8c3c-cc2069f7910d" />
+			</otherwise>
+		</choice>
 		<logger level="INFO" message="post:\customers\registration:application\json:customer-xpapi-config" />
-		<logger level="INFO" doc:name="Logger" doc:id="88758570-9ffe-4897-95e8-eb79a187161e" message="ConfigFlow completed"/>
+		<error-handler ref="Error_Handler_Application" />
     </flow>
 </mule>

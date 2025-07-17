@@ -19,7 +19,7 @@ http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/em
 	<global-property doc:name="Global Property" doc:id="2abe2516-157c-46fb-8568-4b3dce0575e2" name="mule.env" value="local" />
 	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="78c01a78-bd79-4559-b2b3-a2b61beca37b" file="properties\secureproperty-${mule.env}.properties" key="1234567898765432" />
 	<twilio:config name="Twilio_Connector_Config" doc:name="Twilio Connector Config" doc:id="d1e9b031-ce73-440a-a90c-a9ff2023c937" >
-		<twilio:account-sid-auth-token-connection username="AC3617d29b3224573a90b65c5d0e1cedfe" password="9bda34e83250a11b87ce63f9af035ac1" />
+		<twilio:account-sid-auth-token-connection username="AC3617d29b3224573a90b65c5d0e1cedfe" password="7f74c3b1917473a4be2fc5abe79b7145" />
 	</twilio:config>
 	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="59da05f4-9a86-43b0-a6ca-ed623a72b552" >
 		<email:smtp-connection host="smtp.gmail.com" port="587" user="bhavani.galipelli08@gmail.com" password="ytsa axml neus whqi" >

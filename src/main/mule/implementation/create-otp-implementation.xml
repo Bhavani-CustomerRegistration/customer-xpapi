@@ -9,8 +9,11 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/twilio/current/mule-twilio.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
-	<sub-flow name="create-otp-implementationSub_Flow" doc:id="aa8720b0-2d2b-4699-8703-525cb44eada0" >
+	<sub-flow name="create-otp-implementationFlow" doc:id="aa8720b0-2d2b-4699-8703-525cb44eada0" >
 		<logger level="INFO" doc:name="Logger" doc:id="a465a030-f203-4327-b8f8-804516132ea7" message="implementation flow"/>
+		<!-- [STUDIO:"Store"]<os:store doc:name="Store" doc:id="d41b6025-a030-48ae-90bc-0cedff5eaaad" key='#[if(vars.contactType == "email")&#10;(vars.featureName ++ vars.otpAction ++ vars.email)&#10;else&#10;(vars.featureName ++ vars.otpAction ++ vars.mobile)&#93;'>
+			<os:value ><![CDATA[#[vars.otpVar&#93;&#93;&#93;></os:value>
+		</os:store> [STUDIO] -->
 		<choice doc:name="Choice" doc:id="d8d18e6c-f4ce-43b5-b8d3-31f601bd5a1a" >
 			<when expression='#[vars.contactType == "mobile"]'>
 				<flow-ref doc:name="Flow Reference" doc:id="8ea8d52b-901b-41e8-8b0d-f401341ba372" name="create-otp-for-mobile"/>
@@ -42,8 +45,11 @@ output application/x-www-form-urlencoded
 {
 	From : vars.from,
 	To : vars.to,
-	Body: "The otp generated is: " ++ vars.otpVar
-}]]></ee:set-payload>
+	Body:  "Hi the OTP generated is :" ++ vars.otpVar
+	}
+	
+
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<twilio:create20100401-accounts-messagesjson-by-account-sid doc:name="Create Message" doc:id="2a1f0f7c-9fda-4de0-a787-385e8f472f26" accountSid="AC3617d29b3224573a90b65c5d0e1cedfe" config-ref="Twilio_Connector_Config">
