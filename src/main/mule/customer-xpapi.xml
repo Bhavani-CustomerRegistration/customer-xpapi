@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
     
-    <apikit:config name="customer-xpapi-config" api="resource::b887811a-0aee-4b43-baac-d6b92e9c11eb:customer-xpapi:1.0.1:raml:zip:customer-xpapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="customer-xpapi-config" api="resource::b887811a-0aee-4b43-baac-d6b92e9c11eb:customer-xpapi:1.0.3:raml:zip:customer-xpapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="customer-xpapi-main">
         <http:listener config-ref="customer-xpapi-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -54,49 +55,56 @@ output application/json
     <flow name="post:\customers\registration:application\json:customer-xpapi-config">
         <http:listener doc:name="Listener" doc:id="056c204b-3383-4b45-88ca-a06ecbbdbbe4" config-ref="customer-xpapi-httpListenerConfig" path="/customer"/>
 		<logger level="INFO" doc:name="Flow Logger" doc:id="06676732-02fe-406a-a884-300777a9ee4d" message="Flow Processing Started For Transaction ID  #[vars.transactionId]" />
-		<ee:transform doc:name="Transform Message" doc:id="07b19e6e-f140-44a8-a6bb-5c32a58dc7c8" >
-			<ee:message >
+		<ee:transform doc:name="Transform Message" doc:id="07b19e6e-f140-44a8-a6bb-5c32a58dc7c8">
+			<ee:message>
 			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="contactType" ><![CDATA[%dw 2.0
-output application/java
----
-payload.craeteOTPRequest.contactType
-]]></ee:set-variable>
-				<ee:set-variable variableName="to" ><![CDATA[%dw 2.0
-output application/java
----
-payload.craeteOTPRequest.to]]></ee:set-variable>
-				<ee:set-variable variableName="from" ><![CDATA[%dw 2.0
-output application/java
----
-payload.craeteOTPRequest.from]]></ee:set-variable>
-				<ee:set-variable variableName="otpVar" ><![CDATA[%dw 2.0
-output application/json
----
-randomInt(999999) ]]></ee:set-variable>
-				<ee:set-variable variableName="featureName" ><![CDATA[%dw 2.0
+			<ee:variables>
+				<ee:set-variable variableName="featureName"><![CDATA[%dw 2.0
 output application/java
 ---
 attributes.queryParams.featureName]]></ee:set-variable>
-				<ee:set-variable variableName="otpAction" ><![CDATA[%dw 2.0
+				<ee:set-variable variableName="otpAction"><![CDATA[%dw 2.0
 output application/java
 ---
 attributes.queryParams.otpAction]]></ee:set-variable>
-				<ee:set-variable variableName="body" ><![CDATA[%dw 2.0
-output application/java
----
-{
-	"message" : "The OTP is : "
-}]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<choice doc:name="Choice" doc:id="f878faf4-d7ba-4efc-9e72-d93929103516" >
 			<when expression='#[(vars.otpAction == "createOTP") and (vars.featureName == "cwp" or vars.featureName == "po" )]'>
-				<flow-ref doc:name="Flow Reference" doc:id="e7b8e921-48c4-4a0c-9ff7-191be9420b51" name="create-otp-implementationFlow"/>
+				<logger level="INFO" doc:name="Logger" doc:id="4dddf299-0e9a-4ff0-bb9c-97b98c133c68" message="create otp flow" />
+				<ee:transform doc:name="Transform Message" doc:id="4b631002-7cb3-44aa-8010-af1da8f4e5c5">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="contactType" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.contactType]]></ee:set-variable>
+						<ee:set-variable variableName="from" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.from]]></ee:set-variable>
+						<ee:set-variable variableName="to" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.craeteOTPRequest.to]]></ee:set-variable>
+						<ee:set-variable variableName="otpVar" ><![CDATA[%dw 2.0
+output application/json
+---
+randomInt(999999)]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<os:store doc:name="Store otpVar" doc:id="918806ae-6353-48ab-8ca0-f5ea92e40215" key='#["otp-key"]' objectStore="Object_store">
+			<os:value><![CDATA[#[vars.otpVar]]]></os:value>
+		</os:store>
+				<flow-ref doc:name="Flow Reference" doc:id="e7b8e921-48c4-4a0c-9ff7-191be9420b51" name="create-otp-implementationFlow" />
+			</when>
+			<when expression='#[(vars.otpAction == "verifyOTP")]'>
+				<logger level="INFO" doc:name="Logger" doc:id="1ecb2c56-1666-4989-8c3c-cc2069f7910d" message="verify otp flow" />
+				<flow-ref doc:name="Flow Reference" doc:id="2e296a6f-e291-4a6c-b5e1-7b71bf0d6c8e" name="verify-otp-implementationSub_Flow" />
 			</when>
 			<otherwise >
-				<logger level="INFO" doc:name="Logger" doc:id="1ecb2c56-1666-4989-8c3c-cc2069f7910d" />
+				<logger level="INFO" doc:name="Logger" doc:id="3f6422b9-f453-414c-82d4-2805db0400d1" message='#["The given  Action is IN-VALID, Provide valid OTP Action"]'/>
 			</otherwise>
 		</choice>
 		<logger level="INFO" message="post:\customers\registration:application\json:customer-xpapi-config" />

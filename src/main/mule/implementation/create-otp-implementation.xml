@@ -11,9 +11,6 @@ http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/t
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
 	<sub-flow name="create-otp-implementationFlow" doc:id="aa8720b0-2d2b-4699-8703-525cb44eada0" >
 		<logger level="INFO" doc:name="Logger" doc:id="a465a030-f203-4327-b8f8-804516132ea7" message="implementation flow"/>
-		<!-- [STUDIO:"Store"]<os:store doc:name="Store" doc:id="d41b6025-a030-48ae-90bc-0cedff5eaaad" key='#[if(vars.contactType == "email")&#10;(vars.featureName ++ vars.otpAction ++ vars.email)&#10;else&#10;(vars.featureName ++ vars.otpAction ++ vars.mobile)&#93;'>
-			<os:value ><![CDATA[#[vars.otpVar&#93;&#93;&#93;></os:value>
-		</os:store> [STUDIO] -->
 		<choice doc:name="Choice" doc:id="d8d18e6c-f4ce-43b5-b8d3-31f601bd5a1a" >
 			<when expression='#[vars.contactType == "mobile"]'>
 				<set-variable value='#[%dw 2.0&#10;output application/java&#10;---&#10;(payload.craeteOTPRequest.countryCode default "+91") ++ payload.craeteOTPRequest.mobile]' doc:name="Set Variable" doc:id="3c4ba9a5-02d6-4c67-b17b-c2c6ce78177d" variableName="mobile"/>

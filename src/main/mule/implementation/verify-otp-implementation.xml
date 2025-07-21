@@ -8,18 +8,32 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
-	<!-- [STUDIO:"verify-otp-implementationSub_Flow"]<sub-flow name="verify-otp-implementationSub_Flow" doc:id="849d79b4-afab-4a5b-84a2-a0044f19501b" >
-		<os:retrieve doc:name="Retrieve" doc:id="2469534d-ac95-4557-8597-f1691b60395f" key="vars.otpVar" objectStore="Object_store"/>
-		<validation:is-true doc:name="Is true" doc:id="b389af07-e75f-4f2d-8321-58c6ea199d70" expression="#[vars.otpVar == payload.otp&#93;" message="The provided OTP is incorrect."/>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="2e38daea-799c-41f7-89df-b2ed9837ac8c" config-ref="ObjectStore_Config" />
+	<sub-flow name="verify-otp-implementationSub_Flow" doc:id="849d79b4-afab-4a5b-84a2-a0044f19501b" >
+		<os:retrieve doc:name="Retrieve" doc:id="2469534d-ac95-4557-8597-f1691b60395f" key='#["otp-key"]' objectStore="Object_store" target="retrievedOtp">
+			<os:default-value ><![CDATA[123]]></os:default-value>
+		</os:retrieve>
+		<ee:transform doc:name="Transform Message" doc:id="eb7ad119-0e74-46f8-9d32-a05b08023a49" >
+			
+  <ee:message>
+    <ee:set-payload><![CDATA[%dw 2.0
+      output application/json
+      ---
+      payload
+    ]]></ee:set-payload>
+  </ee:message>
+</ee:transform>
+
+		<validation:is-true doc:name="Is true" doc:id="370eb3d5-6a46-4657-a700-f92fc65d56ea" message='#["The otp is verified and it is a valid OTP"]' expression="#[(vars.retrievedOtp) == (payload.otp)]"/>
 		<ee:transform doc:name="Transform Message" doc:id="c750af6a-155e-4f9c-8167-787a6dcc609f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
-&#45;&#45;-
+---
 {
-	"message" : "The otp is verified and it is a valid OTP"
-}&#93;&#93;></ee:set-payload>
+	"message" : "The otp is verified and it is a valid OTP : " ++ (payload.otp as Number)
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</sub-flow> [STUDIO] -->
+	</sub-flow>
 </mule>
