@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_aa8720b0_2d2b_4699_8703_525cb44eada0_Output_Attributes = {|
+  statusCode: Number, 
+  headers: { _?: String }, 
+  reasonPhrase: String
+|} {"typeId": "com.mulesoft.connectivity.twilioconnector.rest.commons.api.operation.HttpResponseAttributes",
+"typeAlias": "HttpResponseAttributes"}
+

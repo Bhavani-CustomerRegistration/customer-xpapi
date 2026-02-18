@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:twilio="http://www.mulesoft.org/schema/mule/twilio"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/twilio/current/mule-twilio.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<sub-flow name="create-otp-implementationFlow" doc:id="aa8720b0-2d2b-4699-8703-525cb44eada0" >
+		<logger level="INFO" doc:name="Logger" doc:id="a465a030-f203-4327-b8f8-804516132ea7" message="implementation flow"/>
+		<choice doc:name="Choice" doc:id="d8d18e6c-f4ce-43b5-b8d3-31f601bd5a1a" >
+			<when expression='#[vars.contactType == "mobile"]'>
+				<set-variable value='#[%dw 2.0&#10;output application/java&#10;---&#10;(payload.craeteOTPRequest.countryCode default "+91") ++ payload.craeteOTPRequest.mobile]' doc:name="Set Variable" doc:id="3c4ba9a5-02d6-4c67-b17b-c2c6ce78177d" variableName="mobile"/>
+				<flow-ref doc:name="Flow Reference" doc:id="8ea8d52b-901b-41e8-8b0d-f401341ba372" name="create-otp-for-mobile"/>
+			</when>
+			<when expression='#[vars.contactType == "email"]'>
+				<set-variable value="#[%dw 2.0&#10;output application/java&#10;---&#10;payload.craeteOTPRequest.email]" doc:name="Set Variable" doc:id="e76a61fc-8128-4a59-974e-8ac33048a8f7" variableName="email"/>
+				<flow-ref doc:name="Flow Reference" doc:id="a132b3da-1726-4fd0-8cc3-1be55448b54e" name="create-otp-for-email" />
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="2bf91fbb-3030-4d8c-90bd-9343d5db71da" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "The contact type is not correct"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="f9293393-3f4c-4727-9254-9782250172e9" message="create otp flow completed"/>
+	</sub-flow>
+	<sub-flow name="create-otp-for-mobile" doc:id="969fcccd-0eba-480e-92cd-c70241e4a9a5" >
+		<ee:transform doc:name="Transform Message" doc:id="c2ba34ba-f44c-4507-aaa2-9528655577f2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/x-www-form-urlencoded
+---
+{
+	From : vars.from,
+	To : vars.to,
+	Body:  "Hi the OTP generated is :" ++ (vars.otpVar as String)
+	}
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<twilio:create20100401-accounts-messagesjson-by-account-sid doc:name="Create Message" doc:id="2a1f0f7c-9fda-4de0-a787-385e8f472f26" accountSid="AC3617d29b3224573a90b65c5d0e1cedfe" config-ref="Twilio_Connector_Config">
+		</twilio:create20100401-accounts-messagesjson-by-account-sid>
+		<ee:transform doc:name="Transform Message" doc:id="bff12ac6-4fb7-460c-af94-e731d241c434" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"message" : payload
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="56b084b6-fd10-4b5c-92fd-e4801a69d8af" message='"Message sent to mobile successfully"  #[payload]' />
+	</sub-flow>
+	<sub-flow name="create-otp-for-email" doc:id="eeb83536-4b8c-45ce-bb63-4d3e95473fbc" >
+		<ee:transform doc:name="Transform Message" doc:id="9dbf3d6f-e093-4896-8253-94f6ffe220a6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+	From : vars.from,
+	To : vars.to,
+	Body: "The OTP has generated : " ++ (vars.otpVar as String)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<email:send doc:id="74049153-8dd0-41b3-8822-f169058763c7" toAddresses="#[[vars.to]]" fromAddress="#[vars.from]" config-ref="Email_SMTP" subject='#["This mail coming from Mule Soft"]'>
+			<email:body contentType="text/plain" encoding="UTF-8" contentTransferEncoding="Quoted-Printable">
+				<email:content ><![CDATA[#[payload.Body]]]></email:content>
+			</email:body>
+		</email:send>
+		<ee:transform doc:name="Transform Message" doc:id="0bd2289e-a3c4-4417-bdc0-741e9781109f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"message": payload
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="20d7de12-defe-4199-9f6d-e073b65742af" message='"email sent to mail-id successfully"  #[payload]' />
+	</sub-flow>
+</mule>

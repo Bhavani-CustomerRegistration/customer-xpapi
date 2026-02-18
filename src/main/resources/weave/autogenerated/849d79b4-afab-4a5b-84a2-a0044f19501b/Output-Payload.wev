@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_849d79b4_afab_4a5b_84a2_a0044f19501b_Output_Payload = {
+  contactType: "mobile" | "email", 
+  locale: "hi" | "en", 
+  userName: String, 
+  _?: Any
+}
+

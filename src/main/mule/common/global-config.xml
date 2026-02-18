@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:twilio="http://www.mulesoft.org/schema/mule/twilio"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/twilio http://www.mulesoft.org/schema/mule/twilio/current/mule-twilio.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="customer-xpapi-httpListenerConfig">
+        <http:listener-connection host="${secure::http.host}" port="${secure::http.port}" readTimeout="${secure::http.readTimeout}" usePersistentConnections="false" connectionIdleTimeout="${secure::http.connectionTimeout}">
+			<reconnection >
+				<reconnect frequency="${secure::http.retryFrequency}" count="${secure::http.retryAttempt}" />
+			</reconnection>
+		</http:listener-connection>
+    </http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="f6476c4d-1b3a-4615-8b2f-506c378e1654" file="properties\secureproperty-${mule.env}.properties" />
+	<global-property doc:name="Global Property" doc:id="2abe2516-157c-46fb-8568-4b3dce0575e2" name="mule.env" value="local" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="78c01a78-bd79-4559-b2b3-a2b61beca37b" file="properties\secureproperty-${mule.env}.properties" key="1234567898765432" />
+	<twilio:config name="Twilio_Connector_Config" doc:name="Twilio Connector Config" doc:id="d1e9b031-ce73-440a-a90c-a9ff2023c937" >
+		<twilio:account-sid-auth-token-connection username="AC3617d29b3224573a90b65c5d0e1cedfe" password="7f74c3b1917473a4be2fc5abe79b7145" />
+	</twilio:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="59da05f4-9a86-43b0-a6ca-ed623a72b552" >
+		<email:smtp-connection host="smtp.gmail.com" port="587" user="bhavani.galipelli08@gmail.com" password="ytsa axml neus whqi" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.required" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="7f9e62d3-b3c5-4d1b-99c0-61cd4ca6c95d" >
+		<os:connection />
+	</os:config>
+
+</mule>
